@@ -1,4 +1,5 @@
 from devices.LYWSD03MMC_ATC import LYWSD03MMC_ATC
+from devices.LYWSD03MMC_ORIGINAL import LYWSD03MMC_ORIGINAL
 
 
 class Sensor:
@@ -23,6 +24,14 @@ class Sensor:
         return self.asdict().keys()
 
 
+    def values(self):
+        return self.asdict().values()
+
+
+    def items(self):
+        return self.asdict().items()
+
+
     def __getitem__(self, key):
         return self.asdict()[key]
 
@@ -44,4 +53,4 @@ class Sensor:
         toStr = ""
         for key, value in self.asdict().items():
             toStr += f"{key}: {value}\n"
-        return toStr
+        return toStr.strip()

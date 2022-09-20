@@ -2,9 +2,9 @@ import datetime
 import json
 
 
-class LYWSD03MMC_ATC:
+class LYWSD03MMC_ORIGINAL:
     def __init__(self):
-        self.description = "Xiaomi Mi Temperature and Humidity Monitor 2 (LYWSD03MMC) with ATC firmware"
+        self.description = "Xiaomi Mi Temperature and Humidity Monitor 2 (LYWSD03MMC) with ORIGINAL firmware"
         self.dateTime = None
         self.rssi = None
         self.tempc = None
@@ -58,6 +58,8 @@ class LYWSD03MMC_ATC:
     def fillData(self, msg):
         self.dateTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         jsonMsg = json.loads(msg)
+        print(jsonMsg)
+        exit()
         self.rssi = jsonMsg["rssi"]
         self.tempc = jsonMsg["tempc"]
         self.hum = jsonMsg["hum"]

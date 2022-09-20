@@ -4,6 +4,7 @@ from sensor import Sensor
 import settings
 import configparser
 from devices.LYWSD03MMC_ATC import LYWSD03MMC_ATC
+from devices.LYWSD03MMC_ORIGINAL import LYWSD03MMC_ORIGINAL
 
 
 broker = settings.mqttHost
@@ -38,11 +39,12 @@ def connect_mqtt() -> mqtt_client:
 
 def subscribe(client: mqtt_client, topic):
     def on_message(client, userdata, msg):
+        print(msg.topic, msg.payload.decode())
         msgTopic = msg.topic
         if msgTopic in router:
             obj = router[msgTopic]
             obj.sensorData.fillData(msg.payload.decode())
-            print(obj)
+            print(obj, '\n')
 
     client.subscribe(topic)
     client.on_message = on_message
