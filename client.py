@@ -1,6 +1,7 @@
 import random
 from paho.mqtt import client as mqtt_client
 import settings
+import configparser
 from devices.LYWSD03MMC_ATC import LYWSD03MMC_ATC
 
 
@@ -10,11 +11,13 @@ username = settings.mqttUser
 password = settings.mqttPasswd
 client_id = 'python-mqtt-5'
 
-router = {
-    "home/OpenMQTTGateway/BTtoMQTT/A4C1387AB9CF" : LYWSD03MMC_ATC,
-    "home/OpenMQTTGateway/BTtoMQTT/A4C138E57826" : LYWSD03MMC_ATC,
-    "home/OpenMQTTGateway/BTtoMQTT/A4C1386E4AE8" : LYWSD03MMC_ATC
-    }
+router = {}
+sensoresFile = "sensores.ini"
+sensoresConfig = configparser.ConfigParser()
+sensoresConfig.read(sensoresFile)
+sensores = sensoresConfig.sections()
+for sensor in sensores:
+    router.update({sensoresConfig[sensor]["topic"] : eval(sensoresConfig[sensor]["type"])})
 
 
 def connect_mqtt() -> mqtt_client:
