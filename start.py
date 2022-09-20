@@ -17,7 +17,7 @@ sensoresConfig = configparser.ConfigParser()
 sensoresConfig.read(sensoresFile)
 sensores = sensoresConfig.sections()
 for sensor in sensores:
-    router.update({sensoresConfig[sensor]["topic"] : eval(sensoresConfig[sensor]["type"])})
+    router.update({sensoresConfig[sensor]["topic"] : {"class": eval(sensoresConfig[sensor]["type"]), "location": sensoresConfig[sensor]["location"]}})
 
 
 def connect_mqtt() -> mqtt_client:
@@ -40,8 +40,8 @@ def subscribe(client: mqtt_client, topic):
         msgTopic = msg.topic
 
         if msgTopic in router:
-            obj = router[msgTopic](msg.payload.decode())
-            obj.print()
+            obj = router[msgTopic]["class"](msg.payload.decode(), router[msgTopic]["location"])
+            print(obj.getData())
 
     client.subscribe(topic)
     client.on_message = on_message
