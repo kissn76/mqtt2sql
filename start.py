@@ -1,5 +1,6 @@
 import random
 from paho.mqtt import client as mqtt_client
+from sensor import Sensor
 import settings
 import configparser
 from devices.LYWSD03MMC_ATC import LYWSD03MMC_ATC
@@ -17,7 +18,7 @@ sensoresConfig = configparser.ConfigParser()
 sensoresConfig.read(sensoresFile)
 sensores = sensoresConfig.sections()
 for sensor in sensores:
-    router.update({sensoresConfig[sensor]["topic"] : {"class": eval(sensoresConfig[sensor]["type"]), "location": sensoresConfig[sensor]["location"]}})
+    router.update({sensoresConfig[sensor]["topic"]: Sensor(sensor, sensoresConfig[sensor]["topic"], sensoresConfig[sensor]["type"], sensoresConfig[sensor]["location"])})
 
 
 def connect_mqtt() -> mqtt_client:
@@ -38,10 +39,10 @@ def connect_mqtt() -> mqtt_client:
 def subscribe(client: mqtt_client, topic):
     def on_message(client, userdata, msg):
         msgTopic = msg.topic
-
         if msgTopic in router:
-            obj = router[msgTopic]["class"](msg.payload.decode(), router[msgTopic]["location"])
-            print(obj.getData())
+            obj = router[msgTopic]
+            obj.sensorData.fillData(msg.payload.decode())
+            print(obj)
 
     client.subscribe(topic)
     client.on_message = on_message
