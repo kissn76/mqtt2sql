@@ -2,6 +2,11 @@ import datetime
 import json
 
 
+"""
+home/OpenMQTTGateway/BTtoMQTT/A4C1386E4AE8 {"id":"A4:C1:38:6E:4A:E8","mac_type":0,"name":"ATC_6E4AE8","rssi":-91,"brand":"Xiaomi","model":"LYWSD03MMC","model_id":"LYWSD03MMC_ATC","tempc":14.2,"tempf":57.56,"hum":56,"batt":75,"volt":2.887}
+"""
+
+
 class LYWSD03MMC_ATC:
     def __init__(self):
         self.description = "Xiaomi Mi Temperature and Humidity Monitor 2 (LYWSD03MMC) with ATC firmware"
@@ -55,7 +60,7 @@ class LYWSD03MMC_ATC:
         return toStr.strip()
 
 
-    def fillData(self, msg):
+    def fillData(self, topic, msg):
         self.dateTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         jsonMsg = json.loads(msg)
         self.rssi = jsonMsg["rssi"]

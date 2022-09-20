@@ -1,12 +1,11 @@
 from devices.LYWSD03MMC_ATC import LYWSD03MMC_ATC
-from devices.LYWSD03MMC_ORIGINAL import LYWSD03MMC_ORIGINAL
+from devices.SHELLYPLUG_S import SHELLYPLUG_S
 
 
 class Sensor:
-    def __init__(self, id, topic, sensorType, location=None) -> None:
+    def __init__(self, id, sensorType, location=None) -> None:
         self.id = id
         self.sensorType = sensorType
-        self.topic = topic
         self.location = location
         self.sensorData = eval(sensorType)()
         self.description = self.sensorData.description
@@ -41,7 +40,6 @@ class Sensor:
             "id": self.id,
             "sensorType": self.sensorType,
             "description": self.description,
-            "topic": self.topic,
             "location": self.location
         }
         td = dict(self.sensorData)

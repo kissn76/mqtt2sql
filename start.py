@@ -3,8 +3,9 @@ from paho.mqtt import client as mqtt_client
 from sensor import Sensor
 import settings
 import configparser
+import json
 from devices.LYWSD03MMC_ATC import LYWSD03MMC_ATC
-from devices.LYWSD03MMC_ORIGINAL import LYWSD03MMC_ORIGINAL
+from devices.SHELLYPLUG_S import SHELLYPLUG_S
 
 
 broker = settings.mqttHost
@@ -14,13 +15,18 @@ password = settings.mqttPasswd
 client_id = 'python-mqtt-5'
 
 router = {}
+sensores = {}
 sensoresFile = "sensores.ini"
 sensoresConfig = configparser.ConfigParser()
 sensoresConfig.read(sensoresFile)
-sensores = sensoresConfig.sections()
-for sensor in sensores:
-    router.update({sensoresConfig[sensor]["topic"]: Sensor(sensor, sensoresConfig[sensor]["topic"], sensoresConfig[sensor]["type"], sensoresConfig[sensor]["location"])})
+sensoresIDs = sensoresConfig.sections()
+for sensorID in sensoresIDs:
+    for topic in json.loads(sensoresConfig[sensorID]["topics"]):
+        router.update({topic: sensorID})
 
+    sensores.update({sensorID: Sensor(sensorID, sensoresConfig[sensorID]["type"], sensoresConfig[sensorID]["location"])})
+
+# print(router)
 
 def connect_mqtt() -> mqtt_client:
     def on_connect(client, userdata, flags, rc):
@@ -39,11 +45,12 @@ def connect_mqtt() -> mqtt_client:
 
 def subscribe(client: mqtt_client, topic):
     def on_message(client, userdata, msg):
-        print(msg.topic, msg.payload.decode())
+        # print(msg.topic, msg.payload.decode())
         msgTopic = msg.topic
         if msgTopic in router:
-            obj = router[msgTopic]
-            obj.sensorData.fillData(msg.payload.decode())
+            print(msgTopic, msg.payload.decode())
+            obj = sensores[router[msgTopic]]
+            obj.sensorData.fillData(msgTopic, msg.payload.decode())
             print(obj, '\n')
 
     client.subscribe(topic)
