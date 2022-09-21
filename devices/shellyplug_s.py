@@ -115,7 +115,7 @@ class ShellyPlugS:
 
 
     def fill_data(self, topic, msg):
-        self.date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.date_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         topic_list = topic.split("/")
         topic_list.pop(0)
         topic_list.pop(0)

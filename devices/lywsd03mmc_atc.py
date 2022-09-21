@@ -106,7 +106,7 @@ class Lywsd03mmcAtc:
 
 
     def fill_data(self, topic, msg):    # pylint: disable=unused-argument
-        self.date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.date_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         msg_json = json.loads(msg)
         self.rssi = msg_json["rssi"]
         self.tempc = msg_json["tempc"]

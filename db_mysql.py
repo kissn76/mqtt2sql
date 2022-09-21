@@ -38,7 +38,7 @@ def create_tables():
     sql_create_table_sensordata = """CREATE TABLE IF NOT EXISTS sensordata (
                                         id int(11) NOT NULL AUTO_INCREMENT,
                                         sensorid text NOT NULL,
-                                        datetime text NOT NULL,
+                                        datetime datetime NOT NULL,
                                         location text,
                                         sensorType text NOT NULL,
                                         unit text,
