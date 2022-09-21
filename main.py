@@ -1,5 +1,8 @@
 # pylint: disable=missing-module-docstring, missing-function-docstring, line-too-long
 
+# pip install paho-mqtt
+# pip install mysql-connector-python
+
 import configparser
 import json
 from paho.mqtt import client as mqtt_client
@@ -8,10 +11,11 @@ import settings
 import db_mysql as db
 
 
-BROKER_HOST = settings.mqttHost
-BROKER_PORT = settings.mqttPort
-BROKER_USERNAME = settings.mqttUser
-BROKER_PASSWORD = settings.mqttPasswd
+setting = settings.Settings()
+BROKER_HOST = setting.mqtt_host
+BROKER_PORT = setting.mqtt_port
+BROKER_USERNAME = setting.mqtt_user
+BROKER_PASSWORD = setting.mqtt_password
 BROKER_CLIENT_ID = 'python-mqtt-5'
 
 ROUTER = {}

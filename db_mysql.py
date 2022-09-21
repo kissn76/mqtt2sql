@@ -1,14 +1,14 @@
 # pylint: disable=missing-module-docstring, missing-function-docstring, line-too-long
 
-# pip install mysql-connector-python
 import mysql.connector as mysql
 import settings
 
 
-MYSQL_HOST = settings.mysqlHost
-MYSQL_USER = settings.mysqlUser
-MYSQL_PASSWORD = settings.mysqlPasswd
-MYSQL_DATABASE = settings.mysqlDatabase
+setting = settings.Settings()
+MYSQL_HOST = setting.mysql_host
+MYSQL_USER = setting.mysql_user
+MYSQL_PASSWORD = setting.mysql_password
+MYSQL_DATABASE = setting.mysql_database
 
 
 def create_connection() -> mysql.MySQLConnection:

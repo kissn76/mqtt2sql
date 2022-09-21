@@ -1,26 +1,21 @@
+# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring, line-too-long
+
 import configparser
 
-settingsFile = "settings.ini"
 
-mqttHost = None
-mqttPort = None
-mqttUser = None
-mqttPasswd = None
+class Settings:
+    def __init__(self):
+        settings_file = "settings.ini"
 
-mysqlHost = None
-mysqlUser = None
-mysqlPasswd = None
-mysqlDatabase = None
+        config = configparser.ConfigParser()
+        config.read(settings_file)
 
-config = configparser.ConfigParser()
-config.read(settingsFile)
+        self.mqtt_host = config["MQTT"]["host"]
+        self.mqtt_port = int(config["MQTT"]["port"])
+        self.mqtt_user = config["MQTT"]["user"]
+        self.mqtt_password = config["MQTT"]["passwd"]
 
-mqttHost = config["MQTT"]["host"]
-mqttPort = int(config["MQTT"]["port"])
-mqttUser = config["MQTT"]["user"]
-mqttPasswd = config["MQTT"]["passwd"]
-
-mysqlHost = config["MYSQL"]["host"]
-mysqlUser = config["MYSQL"]["user"]
-mysqlPasswd = config["MYSQL"]["passwd"]
-mysqlDatabase = config["MYSQL"]["database"]
+        self.mysql_host = config["MYSQL"]["host"]
+        self.mysql_user = config["MYSQL"]["user"]
+        self.mysql_password = config["MYSQL"]["passwd"]
+        self.mysql_database = config["MYSQL"]["database"]
