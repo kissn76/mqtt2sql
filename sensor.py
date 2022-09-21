@@ -47,6 +47,14 @@ class Sensor:
         return sd
 
 
+    def reset(self):
+        self.sensorData.reset()
+
+
+    def isReady(self):
+        return self.sensorData.isReady()
+
+
     def toString(self):
         toStr = ""
         for key, value in self.asdict().items():

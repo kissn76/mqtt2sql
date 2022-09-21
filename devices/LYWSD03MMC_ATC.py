@@ -11,6 +11,7 @@ class LYWSD03MMC_ATC:
     def __init__(self):
         self.description = "Xiaomi Mi Temperature and Humidity Monitor 2 (LYWSD03MMC) with ATC firmware"
         self.dateTime = None
+
         self.rssi = None
         self.tempc = None
         self.hum = None
@@ -51,6 +52,22 @@ class LYWSD03MMC_ATC:
             "battery": self.batt,
             "voltage": self.volt
         }
+
+
+    def reset(self):
+        self.dateTime = None
+        self.rssi = None
+        self.tempc = None
+        self.hum = None
+        self.batt = None
+        self.volt = None
+
+
+    def isReady(self):
+        if self.dateTime is not None and self.rssi is not None and self.tempc is not None and self.hum is not None and self.batt is not None and self.volt is not None:
+            return True
+        else:
+            return False
 
 
     def toString(self):

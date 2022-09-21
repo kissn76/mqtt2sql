@@ -15,9 +15,10 @@ class SHELLYPLUG_S:
     def __init__(self):
         self.description = "Shelly Plug S"
         self.dateTime = None
-        self.relayPower = {}
-        self.relayEnergy = {}
-        self.relay = {}
+
+        self.power = {}
+        self.energy = {}
+        self.state = {}
         self.temperature = None
         self.overtemperature = None
 
@@ -49,12 +50,28 @@ class SHELLYPLUG_S:
     def asdict(self):
         return {
             "datetime": self.dateTime,
-            "relayPower": self.relayPower,
-            "relayEnergy": self.relayEnergy,
-            "relay": self.relay,
+            "power": self.power,
+            "energy": self.energy,
+            "state": self.state,
             "temperature": self.temperature,
             "overtemperature": self.overtemperature
         }
+
+
+    def reset(self):
+        self.dateTime = None
+        self.power = {}
+        self.energy = {}
+        self.state = {}
+        self.temperature = None
+        self.overtemperature = None
+
+
+    def isReady(self):
+        if self.dateTime is not None and self.power is not None and self.energy is not None and self.state is not None and self.temperature is not None and self.overtemperature is not None:
+            return True
+        else:
+            return False
 
 
     def toString(self):
@@ -76,9 +93,13 @@ class SHELLYPLUG_S:
             self.overtemperature = msg
         elif topicLine[0] == "relay":
             if len(topicLine) == 2:
-                self.relay.update({topicLine[1]: msg})
+                if msg == "on":
+                    msg = 1
+                else:
+                    msg = 0
+                self.state.update({topicLine[1]: msg})
             else:
                 if topicLine[2] == "power":
-                    self.relayPower.update({topicLine[1]: float(msg)})
+                    self.power.update({topicLine[1]: float(msg)})
                 if topicLine[2] == "energy":
-                    self.relayEnergy.update({topicLine[1]: int(msg)})
+                    self.energy.update({topicLine[1]: round(float(msg) * 0.00001666666666666666667, 4)})

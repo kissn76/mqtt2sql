@@ -1,9 +1,11 @@
+from datetime import datetime
 import random
 from paho.mqtt import client as mqtt_client
 from sensor import Sensor
 import settings
 import configparser
 import json
+import db_mysql as db
 from devices.LYWSD03MMC_ATC import LYWSD03MMC_ATC
 from devices.SHELLYPLUG_S import SHELLYPLUG_S
 
@@ -21,12 +23,10 @@ sensoresConfig = configparser.ConfigParser()
 sensoresConfig.read(sensoresFile)
 sensoresIDs = sensoresConfig.sections()
 for sensorID in sensoresIDs:
+    sensores.update({sensorID: Sensor(sensorID, sensoresConfig[sensorID]["type"], sensoresConfig[sensorID]["location"])})
     for topic in json.loads(sensoresConfig[sensorID]["topics"]):
         router.update({topic: sensorID})
 
-    sensores.update({sensorID: Sensor(sensorID, sensoresConfig[sensorID]["type"], sensoresConfig[sensorID]["location"])})
-
-# print(router)
 
 def connect_mqtt() -> mqtt_client:
     def on_connect(client, userdata, flags, rc):
@@ -35,7 +35,6 @@ def connect_mqtt() -> mqtt_client:
         else:
             print("Failed to connect, return code %d\n", rc)
 
-    # client = mqtt_client.Client(client_id)
     client = mqtt_client.Client()
     client.username_pw_set(username, password)
     client.on_connect = on_connect
@@ -45,13 +44,29 @@ def connect_mqtt() -> mqtt_client:
 
 def subscribe(client: mqtt_client, topic):
     def on_message(client, userdata, msg):
-        # print(msg.topic, msg.payload.decode())
         msgTopic = msg.topic
         if msgTopic in router:
-            print(msgTopic, msg.payload.decode())
             obj = sensores[router[msgTopic]]
             obj.sensorData.fillData(msgTopic, msg.payload.decode())
-            print(obj, '\n')
+            if obj.isReady():
+                # print(obj, '\n')
+                datas = obj.asdict()
+                dateTime = datas["datetime"]
+                id = datas["id"]
+                location = datas["location"]
+                datas.pop("datetime")
+                datas.pop("id")
+                datas.pop("sensorType")
+                datas.pop("description")
+                datas.pop("location")
+                for key, value in datas.items():
+                    if type(value) is dict:
+                        for valueKey, valueValue in value.items():
+                            db.data_insert("sensordata", sensorid=id, datetime=dateTime, location=location + valueKey, sensorType=key, unit=None, value=valueValue)
+                    else:
+                        db.data_insert("sensordata", sensorid=id, datetime=dateTime, location=location, sensorType=key, unit=None, value=value)
+
+                obj.reset()
 
     client.subscribe(topic)
     client.on_message = on_message
@@ -65,4 +80,5 @@ def run():
 
 
 if __name__ == '__main__':
+    db.create_tables()
     run()

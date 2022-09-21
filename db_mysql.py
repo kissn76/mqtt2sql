@@ -13,7 +13,7 @@ def create_connection() -> mysql.MySQLConnection:
     conn = None
     try:
         conn = mysql.connect(host=mysqlHost, user=mysqlUser, passwd=mysqlPasswd, database=mysqlDatabase)
-    except mysql.connector.Error as e:
+    except mysql.Error as e:
         print(e)
 
     return conn
@@ -25,7 +25,7 @@ def create_table(create_table_sql:str):
         try:
             cur = conn.cursor()
             cur.execute(create_table_sql)
-        except mysql.connector.Error as e:
+        except mysql.Error as e:
             print(e)
     else:
         print("Error! Cannot create the database connection.")
@@ -34,10 +34,14 @@ def create_table(create_table_sql:str):
 
 def create_tables():
     sql_create_table_sensordata = """CREATE TABLE IF NOT EXISTS sensordata (
-                                        id integer PRIMARY KEY,
+                                        id int(11) NOT NULL AUTO_INCREMENT,
                                         sensorid text NOT NULL,
                                         datetime text NOT NULL,
-                                        value real NOT NULL
+                                        location text,
+                                        sensorType text NOT NULL,
+                                        unit text,
+                                        value double NOT NULL,
+                                        PRIMARY KEY (id)
                                     );"""
 
     create_table(sql_create_table_sensordata)
@@ -45,8 +49,9 @@ def create_tables():
 
 def data_insert(table:str, **values) -> int:
     columnNames = ', '.join(values.keys())
-    columnValues = ', '.join(['?'] * len(values))
+    columnValues = ', '.join(['%s'] * len(values))
     sql = f"INSERT INTO {table} ({columnNames}) VALUES ({columnValues})"
+    # print(sql, tuple(values.values()))
     ret = None
 
     conn = create_connection()
@@ -56,7 +61,7 @@ def data_insert(table:str, **values) -> int:
             cur.execute(sql, tuple(values.values()))
             conn.commit()
             ret = cur.lastrowid
-        except mysql.connector.Error as e:
+        except mysql.Error as e:
             print(e)
     else:
         print("Error! Cannot create the database connection.")
@@ -80,7 +85,7 @@ def data_select(table:str, fields:tuple=("*",), whereClause:str=None) -> list:
             cur = conn.cursor()
             cur.execute(sql)
             ret = cur.fetchall()
-        except mysql.connector.Error as e:
+        except mysql.Error as e:
             print(e)
     else:
         print("Error! Cannot create the database connection.")
