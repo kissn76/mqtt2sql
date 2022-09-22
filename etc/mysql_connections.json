@@ -1,0 +1,73 @@
+[
+    {
+        "name": "default",
+        "host": "",
+        "port": 3306,
+        "user": "",
+        "password": "",
+        "database": "sensores",
+        "tables": [
+            {
+                "table_name": "sensordata",
+                "columns": [
+                    {
+                        "name": "id",
+                        "datatype": "INT",
+                        "not_null": true,
+                        "auto_increment": true,
+                        "unique": true,
+                        "primary_key": true
+                    },
+                    {
+                        "name": "sensorid",
+                        "datatype": "VARCHAR(255)",
+                        "not_null": true,
+                        "auto_increment": false,
+                        "unique": false,
+                        "primary_key": false
+                    },
+                    {
+                        "name": "datetime",
+                        "datatype": "DATETIME",
+                        "not_null": true,
+                        "auto_increment": false,
+                        "unique": false,
+                        "primary_key": false
+                    },
+                    {
+                        "name": "location",
+                        "datatype": "VARCHAR(255)",
+                        "not_null": false,
+                        "auto_increment": false,
+                        "unique": false,
+                        "primary_key": false
+                    },
+                    {
+                        "name": "sensorType",
+                        "datatype": "VARCHAR(255)",
+                        "not_null": true,
+                        "auto_increment": false,
+                        "unique": false,
+                        "primary_key": false
+                    },
+                    {
+                        "name": "unit",
+                        "datatype": "VARCHAR(255)",
+                        "not_null": false,
+                        "auto_increment": false,
+                        "unique": false,
+                        "primary_key": false
+                    },
+                    {
+                        "name": "value",
+                        "datatype": "DOUBLE",
+                        "not_null": true,
+                        "auto_increment": false,
+                        "unique": false,
+                        "primary_key": false
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -25,6 +25,13 @@ DEVICES = {}
 ROUTER = {}
 
 
+setting = settings.Settings()
+MYSQL_HOST = setting.mysql_host
+MYSQL_USER = setting.mysql_user
+MYSQL_PASSWORD = setting.mysql_password
+MYSQL_DATABASE = setting.mysql_database
+
+
 def init():
     topics_file = "etc/topics.ini"
     topics_config = configparser.ConfigParser()
