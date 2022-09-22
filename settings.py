@@ -5,7 +5,7 @@ import configparser
 
 class Settings:
     def __init__(self):
-        settings_file = "settings.ini"
+        settings_file = "etc/settings.ini"
 
         config = configparser.ConfigParser()
         config.read(settings_file)

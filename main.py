@@ -7,36 +7,45 @@ import configparser
 import json
 from paho.mqtt import client as mqtt_client
 from sensor import Sensor
+from topic import Topic
+from device import Device
 import settings
 import db_mysql as db
 
 
-setting = settings.Settings()
-BROKER_HOST = setting.mqtt_host
-BROKER_PORT = setting.mqtt_port
-BROKER_USERNAME = setting.mqtt_user
-BROKER_PASSWORD = setting.mqtt_password
+SETTINGS = settings.Settings()
+BROKER_HOST = SETTINGS.mqtt_host
+BROKER_PORT = SETTINGS.mqtt_port
+BROKER_USERNAME = SETTINGS.mqtt_user
+BROKER_PASSWORD = SETTINGS.mqtt_password
 BROKER_CLIENT_ID = 'python-mqtt-5'
 
+TOPICS = {}
+DEVICES = {}
 ROUTER = {}
-SENSORES = {}
 
 
 def init():
-    sensores_file = "sensores.ini"
-    sensores_config = configparser.ConfigParser()
-    sensores_config.read(sensores_file)
-    sensores_ids = sensores_config.sections()
-    for sensor_id in sensores_ids:
-        obj = Sensor(sensor_id, sensores_config[sensor_id]["type"], sensores_config[sensor_id]["location"])
-        SENSORES.update({sensor_id: obj})
-        subtopics = obj.get_subtopics()
-        for topic in json.loads(sensores_config[sensor_id]["topics"]):
-            if len(subtopics) > 0:
-                for subtopic in subtopics:
-                    ROUTER.update({topic + "/" + subtopic: sensor_id})
-            else:
-                ROUTER.update({topic: sensor_id})
+    topics_file = "etc/topics.ini"
+    topics_config = configparser.ConfigParser()
+    topics_config.read(topics_file)
+    topics = topics_config.sections()
+    for topic in topics:
+        topicobj = Topic(topic, topics_config[topic]["type"], topics_config[topic]["device"])
+        if topicobj.type == "json":
+            pass
+        else:
+            sensorobj = Sensor(topicobj.type, topics_config[topic]["sensorname"], topics_config[topic]["unit"], topics_config[topic]["conversion"], topics_config[topic]["location"])
+            topicobj.sensores.update({0: sensorobj})
+
+        TOPICS.update({topic: topicobj})
+
+    devices_file = "etc/devices.ini"
+    devices_config = configparser.ConfigParser()
+    devices_config.read(devices_file)
+    devices_ids = devices_config.sections()
+    for device_id in devices_ids:
+        DEVICES.update({device_id: Device(device_id, devices_config[device_id]["type"], devices_config[device_id]["location"])})
 
 
 def connect_mqtt() -> mqtt_client:
@@ -56,42 +65,31 @@ def connect_mqtt() -> mqtt_client:
 def subscribe(client: mqtt_client, topic):
     def on_message(client, userdata, msg):  # pylint: disable=unused-argument
         msg_topic = msg.topic
-        if msg_topic in ROUTER:
-            obj = SENSORES[ROUTER[msg_topic]]
-            obj.sensor_data.fill_data(msg_topic, msg.payload.decode())
-            if obj.is_ready():
-                print(obj, '\n')
-                datas = obj.asdict()
-                date_time = datas["datetime"]
-                sensor_id = datas["id"]
-                location = datas["location"]
-                datas.pop("datetime")
-                datas.pop("id")
-                datas.pop("sensorType")
-                datas.pop("description")
-                datas.pop("location")
-                units = obj.get_unit()
-                for key, value in datas.items():
-                    unit = ""
-                    if key in units:
-                        unit = units[key]
-                    if unit is None:
-                        unit = ""
-                    if isinstance(value, dict):
-                        for value_key, value_value in value.items():
-                            db.data_insert("sensordata", sensorid=sensor_id, datetime=date_time, location=location + "/" + value_key, sensorType=key, unit=unit, value=value_value)
-                    else:
-                        db.data_insert("sensordata", sensorid=sensor_id, datetime=date_time, location=location, sensorType=key, unit=unit, value=value)
-                obj.reset()
+        msg_message = msg.payload.decode()
+        topic_obj = TOPICS[msg_topic]
+        device_id = topic_obj.device
+        topic_type = topic_obj.type
+        topic_topic = topic_obj.topic
+        device = DEVICES[device_id]
+
+        if topic_type == "json":
+            # msg_json = json.loads(msg_message)
+            # for key, value in msg_json.items():
+            #     print(topic_topic, key, value)
+            pass
+        else:
+            print(topic_topic, msg_message)
+
+        # print(msg_topic, msg.payload.decode(), '\n')
 
     client.subscribe(topic)
     client.on_message = on_message
 
 
 def run():
-    topic = "#"
     client = connect_mqtt()
-    subscribe(client, topic)
+    for topic in TOPICS:
+        subscribe(client, topic)
     client.loop_forever()
 
 
