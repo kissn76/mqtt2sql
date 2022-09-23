@@ -5,6 +5,7 @@
 
 import configparser
 import json
+import os
 from paho.mqtt import client as mqtt_client
 from sensor import Sensor
 from topic import Topic
@@ -23,16 +24,24 @@ BROKER_CLIENT_ID = 'python-mqtt-5'
 TOPICS = {}
 DEVICES = {}
 ROUTER = {}
+DATABASES = {}
 
 
-setting = settings.Settings()
-MYSQL_HOST = setting.mysql_host
-MYSQL_USER = setting.mysql_user
-MYSQL_PASSWORD = setting.mysql_password
-MYSQL_DATABASE = setting.mysql_database
+# setting = settings.Settings()
+# MYSQL_HOST = setting.mysql_host
+# MYSQL_USER = setting.mysql_user
+# MYSQL_PASSWORD = setting.mysql_password
+# MYSQL_DATABASE = setting.mysql_database
 
 
 def init():
+    for filename in os.scandir("etc/mysql_connections"):
+        if filename.is_file():
+            db_object = db.Mysqldatabase(filename)
+            DATABASES.update({db_object.name: db_object})
+            db_object.create_tables()
+    exit()
+
     topics_file = "etc/topics.ini"
     topics_config = configparser.ConfigParser()
     topics_config.read(topics_file)
@@ -101,6 +110,6 @@ def run():
 
 
 if __name__ == '__main__':
-    db.create_tables()
     init()
+    db.create_tables()
     run()

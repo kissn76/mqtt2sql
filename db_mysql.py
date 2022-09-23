@@ -5,19 +5,32 @@ import mysql.connector as mysql
 
 
 class Mysqldatabase:
-    def __init__(self, host, port, user, password, database):
-        self.host = host
-        self.port = port
-        self.user = user
-        self.password = password
-        self.database = database
+    def __init__(self, db_json_filename):
+        self.name = None
+        self.host = None
+        self.port = None
+        self.user = None
+        self.password = None
+        self.database = None
+        self.tables = None
         self.connection = None
+
+        with open(db_json_filename, "r", encoding='utf-8') as json_file:
+            mysql_connection_json = json.load(json_file)
+            json_file.close()
+            self.name = mysql_connection_json["name"]
+            self.host = mysql_connection_json["host"]
+            self.port = mysql_connection_json["port"]
+            self.user = mysql_connection_json["user"]
+            self.password = mysql_connection_json["password"]
+            self.database = mysql_connection_json["database"]
+            self.tables = mysql_connection_json["tables"]
 
 
     def create_connection(self):
         conn = None
         try:
-            conn = mysql.connect(host=self.host, port=self.port, user=self.user, passwd=self.password, database=MYSQL_DATABASE)
+            conn = mysql.connect(host=self.host, port=self.port, user=self.user, passwd=self.password, database=self.database)
         except mysql.Error as err:
             print(err)
 
@@ -25,6 +38,7 @@ class Mysqldatabase:
 
 
     def create_table(self, create_table_sql: str):
+        print(create_table_sql)
         self.create_connection()
         if bool(self.connection):
             try:
@@ -37,10 +51,8 @@ class Mysqldatabase:
         self.connection.close()
 
 
-    def create_tables(self, tables_json):
-        tables = json.loads(tables_json)
-
-        for table in tables:
+    def create_tables(self):
+        for table in self.tables:
             self.create_table(self.generate_sql(table))
 
 
